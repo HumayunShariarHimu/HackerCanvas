@@ -1,251 +1,306 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>HackerCanvashacker cangues </title>
-    <script src="https://unpkg.com/gifler@0.1.0/gifler.min.js"></script>
-    <style>
-        :root {
-            --accent: #ffffff;
-            --bg: #000000;
-            --dim: #333333;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+<title>HackerCanvas</title>
 
-        body, html {
-            background: var(--bg);
-            color: var(--accent);
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            height: 100%;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+<script src="https://unpkg.com/gifler@0.1.0/gifler.min.js"></script>
 
-        /* মেইন কন্টেইনার */
-        .app-container {
-            width: 95%;
-            max-width: 450px;
-            border: 1px solid var(--accent);
-            position: relative;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(5px);
-        }
+<style>
+/* ✅ Black & White Theme */
+:root {
+    --accent:#ffffff;   /* White */
+    --bg:#000000;       /* Black */
+    --dim:#333333;      /* Dark Gray */
+}
 
-        /* হেডার ডিজাইন */
-        .terminal-header {
-            background: var(--accent);
-            color: var(--bg);
-            padding: 10px 15px;
-            font-size: 11px;
-            font-weight: 900;
-            display: flex;
-            justify-content: space-between;
-            letter-spacing: 2px;
-        }
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
 
-        .header-dots { display: flex; gap: 5px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--bg); }
+body,html{
+    margin:0;
+    height:100%;
+    background:var(--bg);
+    color:var(--accent);
+    font-family:Courier New,monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 
-        /* কন্টেন্ট এরিয়া */
-        .terminal-content {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+.app-container{
+    width:95%;
+    max-width:450px;
+    border:1px solid var(--accent);
+    background:rgba(255,255,255,.03); /* White Blur */
+}
 
-        #canvas-wrapper {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            border: 1px solid var(--dim);
-            position: relative;
-            background: #050505;
-        }
+.terminal-header{
+    background:var(--accent);
+    color:#000;
+    padding:10px;
+    font-size:11px;
+    font-weight:900;
+    display:flex;
+    justify-content:space-between;
+    letter-spacing:2px;
+}
 
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-            filter: grayscale(100%) contrast(150%) brightness(1.1);
-        }
+.header-dots{display:flex;gap:5px}
 
-        /* কন্ট্রোল বাটন */
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+.dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#000;
+}
 
-        button {
-            background: transparent;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 15px 5px;
-            font-family: inherit;
-            font-size: 10px;
-            font-weight: bold;
-            text-transform: ;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            letter-spacing: 1px;
-        }
+.terminal-content{
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
 
-        button:active { transform: scale(0.98); }
-        button:hover:not(:disabled) {
-            background: var(--accent);
-            color: var(--bg);
-        }
+#canvas-wrapper{
+    border:1px solid var(--dim);
+    aspect-ratio:1/1;
+    background:#050505;
+}
 
-        button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            border-style: dashed;
-        }
+canvas{
+    width:100%;
+    height:100%;
+    filter:grayscale(100%) contrast(170%);
+}
 
-        /* স্ট্যাটাস ও ফুটার */
-        #status-bar {
-            font-size: 9px;
-            text-align: center;
-            height: 15px;
-            letter-spacing: 1px;
-            color: var(--accent);
-        }
+.btn-group{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
 
-        .footer-info {
-            border-top: 1px solid var(--dim);
-            padding-top: 15px;
-            font-size: 10px;
-            text-align: center;
-            opacity: 0.6;
-            letter-spacing: 3px;
-        }
+button{
+    background:transparent;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    padding:12px;
+    font-weight:bold;
+    cursor:pointer;
+}
 
-        /* রেকর্ডিং ব্লিংক এনিমেশন */
-        .rec-active {
-            animation: blink 0.8s infinite;
-            color: #ff0000 !important; /* রেকর্ডিং এর সময় সামান্য রেড টাচ বা হাইলাইট */
-        }
+button:hover{
+    background:var(--accent);
+    color:#000;
+}
 
-        @keyframes blink {
-            50% { opacity: 0.4; }
-        }
+button:disabled{
+    opacity:.4;
+}
 
-        /* মোবাইল স্ক্রিন সাইজ অ্যাডজাস্টমেন্ট */
-        @media (max-height: 600px) {
-            .terminal-content { padding: 10px; gap: 10px; }
-            .footer-info { display: none; }
-        }
-    </style>
+#status-bar{
+    text-align:center;
+    font-size:10px;
+}
+
+/* Recording Blink (Only Red Allowed) */
+.rec-active{
+    animation:blink .8s infinite;
+    color:#ff0000;
+}
+
+@keyframes blink{
+    50%{opacity:.4}
+}
+
+.footer-info{
+    font-size:10px;
+    text-align:center;
+    opacity:.5;
+    letter-spacing:3px;
+}
+</style>
 </head>
+
 <body>
 
 <div class="app-container">
-    <div class="terminal-header">
-        <div class="header-dots"><div class="dot"></div><div class="dot"></div></div>
-        <span>HackerCanvas</span>
-        <span>Anonymous</span>
-    </div>
-    
-    <div class="terminal-content">
-        <div id="canvas-wrapper">
-            <canvas id="outputCanvas" width="500" height="500"></canvas>
-        </div>
 
-        <div id="status-bar">System: Ok</div>
-
-        <div class="btn-group">
-            <button id="startBtn">Record</button>
-            <button id="stopBtn" disabled>Kill</button>
-        </div>
-
-        <div class="footer-info">Humayun Shariar Himu</div>
-    </div>
+<div class="terminal-header">
+<div class="header-dots">
+<div class="dot"></div>
+<div class="dot"></div>
+</div>
+<span>HackerCanvas</span>
+<span>Anonymous</span>
 </div>
 
+<div class="terminal-content">
+
+<div id="canvas-wrapper">
+<canvas id="outputCanvas" width="500" height="500"></canvas>
+</div>
+
+<div id="status-bar">SYSTEM: READY</div>
+
+<div class="btn-group">
+<button id="startBtn">RECORD</button>
+<button id="stopBtn" disabled>KILL</button>
+</div>
+
+<div class="footer-info">Humayun Shariar Himu</div>
+
+</div>
+</div>
+
+
 <script>
-    const canvas = document.getElementById('outputCanvas');
-    const ctx = canvas.getContext('2d');
-    const status = document.getElementById('status-bar');
-    let recorder, audioCtx, gifInstance;
-    let chunks = [];
 
-    // সরাসরি GIF লোড
-    gifler('./image.gif').get((a) => {
-        gifInstance = a;
-        gifInstance.animateInCanvas(canvas);
-        status.innerText = "SYSTEM: Active";
-    });
+const canvas = document.getElementById("outputCanvas");
+const status = document.getElementById("status-bar");
 
-    async function getHackerAudio(userStream) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(userStream);
-        const destination = audioCtx.createMediaStreamDestination();
+let recorder;
+let audioCtx;
+let chunks=[];
 
-        const bass = audioCtx.createBiquadFilter();
-        bass.type = "lowshelf";
-        bass.frequency.value = 150;
-        bass.gain.value = 25;
 
-        const lowpass = audioCtx.createBiquadFilter();
-        lowpass.type = "lowpass";
-        lowpass.frequency.value = 800;
+// GIF
+gifler("./image.gif").get(g=>{
+    g.animateInCanvas(canvas);
+});
 
-        source.connect(bass);
-        bass.connect(lowpass);
-        lowpass.connect(destination);
 
-        return destination.stream;
+// 🎧 Hacker Voice Engine (UNCHANGED)
+async function getHackerAudio(stream){
+
+    audioCtx=new AudioContext();
+
+    const source=audioCtx.createMediaStreamSource(stream);
+    const dest=audioCtx.createMediaStreamDestination();
+
+    const bass=audioCtx.createBiquadFilter();
+    bass.type="lowshelf";
+    bass.frequency.value=200;
+    bass.gain.value=30;
+
+    const bandpass=audioCtx.createBiquadFilter();
+    bandpass.type="bandpass";
+    bandpass.frequency.value=900;
+    bandpass.Q.value=1.4;
+
+    const distortion=audioCtx.createWaveShaper();
+
+    function makeDist(amount){
+        const n=44100;
+        const curve=new Float32Array(n);
+
+        for(let i=0;i<n;i++){
+            const x=i*2/n-1;
+            curve[i]=(3+amount)*x*20*Math.PI/(Math.PI+amount*Math.abs(x));
+        }
+
+        return curve;
     }
 
-    document.getElementById('startBtn').onclick = async () => {
-        try {
-            status.innerText = "REQUESTING MIC...";
-            const userStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const hackerAudio = await getHackerAudio(userStream);
-            const videoStream = canvas.captureStream(30);
+    distortion.curve=makeDist(180);
+    distortion.oversample="4x";
 
-            const combined = new MediaStream([
-                ...videoStream.getVideoTracks(),
-                ...hackerAudio.getAudioTracks()
-            ]);
 
-            recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp8,opus' });
-            chunks = [];
+    const comp=audioCtx.createDynamicsCompressor();
 
-            recorder.ondataavailable = e => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `HCKR_${Date.now()}.webm`;
-                a.click();
-                status.innerText = "SIGNAL EXPORTED";
-                status.classList.remove('rec-active');
-            };
+    comp.threshold.value=-25;
+    comp.knee.value=30;
+    comp.ratio.value=12;
+    comp.attack.value=0.003;
+    comp.release.value=0.25;
 
-            recorder.start();
-            status.innerText = "ENCRYPTING...";
-            status.classList.add('rec-active');
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('stopBtn').disabled = false;
-        } catch (e) {
-            status.innerText = "ERROR: ACCESS DENIED";
-            console.error(e);
-        }
+
+    source
+    .connect(bass)
+    .connect(bandpass)
+    .connect(distortion)
+    .connect(comp)
+    .connect(dest);
+
+    return dest.stream;
+}
+
+
+
+// ▶ START
+document.getElementById("startBtn").onclick=async()=>{
+
+try{
+
+    status.innerText="ACCESSING MIC...";
+
+    const mic=await navigator.mediaDevices.getUserMedia({audio:true});
+
+    const hackerVoice=await getHackerAudio(mic);
+
+    const video=canvas.captureStream(30);
+
+    const stream=new MediaStream([
+        ...video.getVideoTracks(),
+        ...hackerVoice.getAudioTracks()
+    ]);
+
+    recorder=new MediaRecorder(stream);
+
+    chunks=[];
+
+    recorder.ondataavailable=e=>chunks.push(e.data);
+
+    recorder.onstop=()=>{
+
+        const blob=new Blob(chunks,{type:"video/webm"});
+
+        const url=URL.createObjectURL(blob);
+
+        const a=document.createElement("a");
+        a.href=url;
+        a.download="HACKER_"+Date.now()+".webm";
+        a.click();
+
+        status.innerText="FILE EXPORTED";
+        status.classList.remove("rec-active");
     };
 
-    document.getElementById('stopBtn').onclick = () => {
-        recorder.stop();
-        if(audioCtx) audioCtx.close();
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('stopBtn').disabled = true;
-    };
+    recorder.start();
+
+    status.innerText="RECORDING...";
+    status.classList.add("rec-active");
+
+    startBtn.disabled=true;
+    stopBtn.disabled=false;
+
+}
+catch(err){
+
+    console.error(err);
+    status.innerText="MIC DENIED";
+
+}
+};
+
+
+
+// ⏹ STOP
+document.getElementById("stopBtn").onclick=()=>{
+
+    recorder.stop();
+
+    if(audioCtx) audioCtx.close();
+
+    startBtn.disabled=false;
+    stopBtn.disabled=true;
+
+};
+
 </script>
 
 </body>
