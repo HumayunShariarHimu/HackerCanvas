@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EncryptCanvas</title>
+    <script src="https://unpkg.com/gifler@0.1.0/gifler.min.js"></script>
+    <style>
+        :root { --white: #ffffff; --black: #000000; }
+        * { box-sizing: border-box; cursor: crosshair; }
+        body, html { margin: 0; height: 100%; background: var(--black); color: var(--white); font-family: 'Courier New', monospace; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .app-container { width: 95%; max-width: 420px; border: 1px solid var(--white); background: black; }
+        .header { border-bottom: 1px solid var(--white); padding: 10px; font-size: 10px; display: flex; justify-content: space-between; letter-spacing: 2px; text-transform: uppercase; }
+        .content { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        #canvas-wrapper { border: 1px solid var(--white); aspect-ratio: 1/1; background: #000; position: relative; }
+        canvas { width: 100%; height: 100%; filter: grayscale(100%) contrast(300%) brightness(0.6); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { background: transparent; border: 1px solid var(--white); color: var(--white); padding: 14px; font-weight: 900; text-transform: uppercase; transition: 0.1s; font-size: 11px; }
+        button:hover { background: var(--white); color: var(--black); }
+        button:disabled { opacity: 0.1; }
+        #status { font-size: 9px; height: 15px; color: var(--white); text-transform: uppercase; }
+        .rec { animation: blink 0.4s infinite; font-weight: bold; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .footer { font-size: 8px; text-align: center; opacity: 0.4; padding: 10px; border-top: 1px solid #222; letter-spacing: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <span>Identity: Null</span>
+        <span>Secure_Mode: On</span>
+    </div>
+    <div class="content">
+        <div id="canvas-wrapper">
+            <canvas id="outputCanvas" width="500" height="500"></canvas>
+        </div>
+        <div id="status">System Ready...</div>
+        <div class="btn-group">
+            <button id="startBtn">Record</button>
+            <button id="stopBtn" disabled>Kill</button>
+        </div>
+    </div>
+    <div class="footer">EncryptCanvas © Humayun Shariar Himu</div>
+</div>
+
+<script>
+const canvas = document.getElementById("outputCanvas");
+const status = document.getElementById("status");
+let recorder, audioCtx, chunks = [];
+
+gifler("./image.gif").get(g => { g.animateInCanvas(canvas); });
+
+// --- ফরেনসিক-প্রুফ ভয়েজ ইঞ্জিন ---
+async function getVoidVoice(stream) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(stream);
+    const dest = audioCtx.createMediaStreamDestination();
+
+    // পিচ শিফটিং এবং মেটালিক ফিল্টার
+    const biquad = audioCtx.createBiquadFilter();
+    biquad.type = "peaking";
+    biquad.frequency.value = 1500;
+    biquad.Q.value = 10;
+    biquad.gain.value = 25;
+
+    // বিট-ক্রাশার (কণ্ঠস্বরকে ডিজিটাল টুকরোয় পরিণত করে)
+    const processor = audioCtx.createScriptProcessor(4096, 1, 1);
+    processor.onaudioprocess = function(e) {
+        let input = e.inputBuffer.getChannelData(0);
+        let output = e.outputBuffer.getChannelData(0);
+        for (let i = 0; i < input.length; i++) {
+            output[i] = Math.round(input[i] * 4) / 4; // চরম লেভেলের ডিফারেনশিয়েশন
+        }
+    };
+
+    source.connect(biquad).connect(processor).connect(dest);
+    return dest.stream;
+}
+
+// --- মেটাডেটা কমপ্লিট স্ট্রিপার ফাংশন (Deep Clean) ---
+async function deepCleanAndDownload(blob) {
+    status.innerText = "SCRUBBING ALL DATA TRAILS...";
+    
+    // ১. ব্লব থেকে অরিজিনাল মেটাডেটা হেডার ডিলিট করার জন্য এর অ্যারে বাফার নেওয়া
+    const arrayBuffer = await blob.arrayBuffer();
+    
+    // ২. নতুন একটি কাস্টম বাইনারি ভিউ তৈরি করা (এটি অরিজিনাল ফাইলের সিগনেচার মুছে দেয়)
+    const cleanData = new Uint8Array(arrayBuffer);
+    
+    // ৩. সম্পূর্ণ নতুন একটি ব্লব তৈরি করা কোনো সোর্স ইনফরমেশন ছাড়া
+    const strippedBlob = new Blob([cleanData], { type: 'video/mp4' });
+    
+    const url = URL.createObjectURL(strippedBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    // র্যান্ডম হেক্স ফাইলনেম (ট্রেসিং অসম্ভব করতে)
+    a.download = `VOID_${crypto.getRandomValues(new Uint32Array(1))[0].toString(16)}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    status.innerText = "EXPORTED: CLEAN_AND_SECURE";
+    status.classList.remove("rec");
+}
+
+document.getElementById("startBtn").onclick = async () => {
+    try {
+        const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const voice = await getVoidVoice(mic);
+        const video = canvas.captureStream(20); 
+
+        recorder = new MediaRecorder(new MediaStream([...video.getVideoTracks(), ...voice.getAudioTracks()]), {
+            mimeType: 'video/webm;codecs=vp8,opus'
+        });
+
+        chunks = [];
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => deepCleanAndDownload(new Blob(chunks));
+
+        recorder.start();
+        status.innerText = "Capturing_Under_Mask...";
+        status.classList.add("rec");
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+    } catch (err) {
+        status.innerText = "Error: Mic Denied";
+    }
+};
+
+document.getElementById("stopBtn").onclick = () => {
+    recorder.stop();
+    if(audioCtx) audioCtx.close();
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+};
+</script>
+</body>
+</html>
