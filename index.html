@@ -117,12 +117,32 @@ button:disabled{
     50%{opacity:.4}
 }
 
-.footer-info{
-    font-size:10px;
-    text-align:center;
-    opacity:.5;
-    letter-spacing:3px;
+.footer-info {
+    font-size: 10px;
+    text-align: center;
+    opacity: 0.7;
+    letter-spacing: 2px;
+    margin-top: 15px;
+    color: var(--accent); /* সাদা */
 }
+
+.footer-info a {
+    color: var(--accent); /* সাদা */
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    padding: 2px 8px;
+    margin-left: 5px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+/* হোভার ইফেক্ট: সাদা ব্যাকগ্রাউন্ড এবং কালো টেক্সট */
+.footer-info a:hover {
+    background: var(--accent); /* সাদা */
+    color: #000; /* কালো */
+    box-shadow: 0 0 10px var(--accent); /* হালকা গ্লো ইফেক্ট */
+}
+
 </style>
 </head>
 
@@ -152,6 +172,8 @@ button:disabled{
 <button id="stopBtn" disabled>KILL</button>
 </div>
 
+<div class="footer-info"> Try ╰┈➤ˎˊ˗ <a href="./encrypted.html">EncryptCanvas</a>
+</div>
 <div class="footer-info">Humayun Shariar Himu</div>
 
 </div>
